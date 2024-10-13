@@ -6,6 +6,7 @@ import requests
 import threading
 import numpy as np
 from numpy.linalg import norm
+from sklearn.cluster import KMeans
 
 def parse(string):
     try:
@@ -235,6 +236,8 @@ def score_region(crimes : list[str], population : int, embeddings) -> float:
 def coords4_to_lat_longs(coords : list[tuple[float, float]]):
     return [str(c) for c in [coords[0][1], coords[0][0], coords[1][1], coords[1][0], coords[2][1], coords[2][0], coords[3][1], coords[3][0]]]
 
+
+
 def final_csv():
     if "embeddings" not in os.listdir("."):
         make_crime_embeddings()
@@ -252,16 +255,28 @@ def final_csv():
         block = blocks[poly_id]
         if len(block.crimes) > 0:
             score = score_region(block.crimes, block.population, embeddings)
-            print(score)
+            
             simplified = block.polygon.simplify(4)
             coords4 = simplified.getCoords()
-            out_line = [poly_id] + coords4_to_lat_longs(coords4) + [str(score)]
+            out_line = [poly_id] + coords4_to_lat_longs(coords4) + [score]
             out_data.append(out_line)
+    # Now, reescale calculated crime scores to 5 clusters using k-means
+    model = KMeans(n_clusters = 5)
+    array = np.array([row[-1] for row in out_data[1:]]).reshape(-1,1)
+    model.fit(array)
+    labels = model.predict(array)
+    print(labels)
+    print(len(labels))
+    print(len(out_data))
+    for i in range(len(labels)):
+        out_data[i + 1][-1] = str(labels[i])  
     out_str = ""
     for line in out_data:
         out_str += ",".join(line) + "\n"
     with open("final.csv", "w") as f:
         f.write(out_str)
+
+
 
 final_csv()
 
