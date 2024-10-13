@@ -20,7 +20,7 @@ def parse(string):
 
 
 def make_blocks() -> dict[str, Block]:
-    with open("../mass.geojson", "r") as f:
+    with open("../usa.geojson", "r") as f:
         string = f.read()
         j = parse(string)
         features = j["features"] # type: ignore
