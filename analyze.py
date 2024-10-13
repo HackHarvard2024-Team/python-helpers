@@ -255,7 +255,6 @@ def final_csv():
         block = blocks[poly_id]
         if len(block.crimes) > 0:
             score = score_region(block.crimes, block.population, embeddings)
-            
             simplified = block.polygon.simplify(4)
             coords4 = simplified.getCoords()
             out_line = [poly_id] + coords4_to_lat_longs(coords4) + [score]
@@ -269,7 +268,7 @@ def final_csv():
     print(len(labels))
     print(len(out_data))
     for i in range(len(labels)):
-        out_data[i + 1][-1] = str(labels[i])  
+        out_data[i + 1][-1] = str(labels[i] + 1)  
     out_str = ""
     for line in out_data:
         out_str += ",".join(line) + "\n"
